@@ -1,0 +1,41 @@
+Prepare my A-CHKO project for production deployment and GitHub/Cloudflare Pages.
+
+IMPORTANT:
+- Do not delete or replace existing A-CHKO features.
+- Do not remove the existing UI, authentication, database integration, communities, posts, short videos, opportunities, profiles, search, or navigation.
+- Preserve all existing functionality.
+- Do not expose API keys, passwords, tokens, secrets, or environment variables in the source code.
+
+TASKS:
+
+1. Inspect the entire repository and identify the actual frontend application package.
+2. Identify whether the frontend uses React, Vite, Next.js, or another framework.
+3. Verify all package.json files, pnpm-workspace.yaml, and pnpm-lock.yaml.
+4. Make sure the frontend has a working production build.
+5. Make sure the correct build command exists in the frontend package.json.
+6. Make sure the correct production output folder is generated.
+7. Make sure the app can be deployed from GitHub to Cloudflare Pages.
+8. Fix build errors, TypeScript errors, dependency errors, and routing issues that prevent production deployment.
+9. Make sure SPA routes work after deployment, including Home, Discover, Create, Communities, Profile, Opportunities, login and signup.
+10. Add the required Cloudflare Pages configuration only if necessary.
+11. Do not hard-code environment variables. Use environment variables for Supabase/API configuration.
+12. Check that all required dependencies are listed in package.json.
+13. Run the production build and verify that it succeeds.
+14. Do not commit secrets or unnecessary Replit-specific files.
+15. Keep the project compatible with pnpm.
+
+A-CHKO branding:
+Name: A-CHKO
+Slogan: Watch, Connect and Discover Opportunities
+Message: Opportunity. Connection. Growth. One Hub. Endless Possibilities.
+
+Before finishing, tell me:
+- Frontend framework
+- Frontend folder/root directory
+- Exact build command
+- Exact output directory
+- Whether the production build succeeded
+- Any environment variables that I must add to Cloudflare
+- Whether the project is ready to commit and push to GitHub
+
+Do not just explain the changes. Actually inspect and fix the project where necessary.
