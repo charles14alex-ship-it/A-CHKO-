@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A-CHKO OS</title><script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></head>
+<body class="bg-[#f5f5f2] text-[13px]">
+<div class="bg-black text-white p-3 flex justify-between items-center sticky top-0 z-50">
+<div class="flex items-center gap-2"><div class="w-7 h-7 bg-white text-black rounded-full flex items-center justify-center font-black">A</div><b>A-CHKO</b></div>
+<div class="flex items-center gap-2">
+<select id="lang" onchange="changeLang(this.value)" class="bg-zinc-800 text-white rounded-full px-2 py-1 text-xs">
+<option value="en">English</option><option value="sw">Kiswahili</option><option value="fr">Français</option><option value="ar">العربية</option><option value="zh">中文</option><option value="hi">हिन्दी</option><option value="es">Español</option><option value="pt">Português</option><option value="de">Deutsch</option><option value="tr">Türkçe</option><option value="ru">Русский</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="it">Italiano</option><option value="am">Amharic</option><option value="ha">Hausa</option><option value="yo">Yoruba</option><option value="zu">Zulu</option><option value="all">🌍 All 100+ Languages...</option>
+</select>
+<button onclick="openCV()" class="bg-white text-black px-3 py-1 rounded-full font-bold text-xs"><i class="fa-solid fa-file"></i> CV</button>
+</div>
+</div>
+
+<div class="max-w-3xl mx-auto p-3">
+<div class="bg-white rounded-[20px] p-3 border flex gap-2 items-center">
+<input id="search" oninput="filter()" placeholder="Search jobs, #hashtag, location..." class="flex-1 outline-none bg-transparent">
+<button onclick="document.getElementById('uploadBox').classList.toggle('hidden')" class="bg-black text-white w-8 h-8 rounded-full"><i class="fa-solid fa-plus"></i></button>
+</div>
+
+<!-- UPLOAD / CAMERA / VIDEO -->
+<div id="uploadBox" class="hidden bg-white rounded-[20px] p-4 border mt-3">
+<textarea id="postText" placeholder="Share opportunity... use #hashtag" class="w-full border rounded-xl p-2 outline-none"></textarea>
+<div class="flex gap-2 mt-3 flex-wrap">
+<label class="bg-zinc-100 px-3 py-2 rounded-full cursor-pointer"><i class="fa-solid fa-image"></i> File <input type="file" id="fileUp" class="hidden" accept="image/*,application/pdf"></label>
+<label class="bg-zinc-100 px-3 py-2 rounded-full cursor-pointer"><i class="fa-solid fa-video"></i> Video <input type="file" id="videoUp" class="hidden" accept="video/*"></label>
+<button onclick="openCamera()" class="bg-zinc-100 px-3 py-2 rounded-full"><i class="fa-solid fa-camera"></i> Camera</button>
+<button onclick="savePost()" class="bg-black text-white px-4 py-2 rounded-full font-bold ml-auto">Post</button>
+</div>
+<video id="cam" autoplay class="hidden w-full rounded-xl mt-3"></video><canvas id="canvas" class="hidden"></canvas>
+<div class="mt-2"><input id="webhook" placeholder="Paste n8n / Make.com Webhook URL for auto opportunities" class="w-full border p-2 rounded-xl text-xs"><button onclick="saveWebhook()" class="text-xs underline mt-1">Save Webhook for Automation</button></div>
+</div>
+
+<div id="list" class="mt-4 space-y-3"></div>
+</div>
+
+<!-- CV TEMPLATE -->
+<div id="cvModal" class="hidden fixed inset-0 bg-black/60 z-[60] p-4 flex items-center justify-center"><div class="bg-white rounded-[20px] p-5 w-full max-w-md"><h2 class="font-bold text-lg">Auto CV Generator</h2><input id="cvName" placeholder="Full Name" class="w-full border p-2 rounded-xl mt-2"><input id="cvSkill" placeholder="Skills e.g. Customer Service" class="w-full border p-2 rounded-xl mt-2"><textarea id="cvExp" placeholder="Experience" class="w-full border p-2 rounded-xl mt-2"></textarea><button onclick="genCV()" class="w-full bg-black text-white py-2 rounded-xl mt-3 font-bold">Generate & Download PDF</button><button onclick="this.parentElement.parentElement.classList.add('hidden')" class="w-full py-2 mt-2">Close</button></div></div>
+
+<script>
+let posts=JSON.parse(localStorage.getItem('achko_pro')||'[]');
+let webhookUrl=localStorage.getItem('achko_webhook')||'';
+document.getElementById('webhook').value=webhookUrl;
+if(posts.length==0){posts=[{id:1,text:'Vodacom Customer Service #jobs #Dar',likes:12,saved:false,follow:false,hashtags:['#jobs','#Dar'],file:'',type:'jobs'},{id:2,text:'Mastercard Scholarship full funded #scholarship #UK',likes:34,saved:false,follow:false,hashtags:['#scholarship'],file:'',type:'scholarships'}];}
+function render(){let l=document.getElementById('list');l.innerHTML='';posts.forEach(p=>{l.innerHTML+=`<div class="bg-white rounded-[20px] p-4 border" data-text="${p.text.toLowerCase()}">
+<div class="flex justify-between"><span class="bg-zinc-100 text-[10px] px-2 py-1 rounded-full font-bold">${p.type}</span><button onclick="editPost(${p.id})" class="text-zinc-400"><i class="fa-solid fa-pen"></i></button></div>
+<p class="mt-3 whitespace-pre-wrap">${p.text}</p>
+${p.file?`<img src="${p.file}" class="w-full rounded-xl mt-3">`:''}
+<div class="flex flex-wrap gap-1 mt-2">${p.hashtags.map(h=>`<span class="text-blue-600 text-xs">${h}</span>`).join('')}</div>
+<div class="flex justify-between mt-4 text-zinc-500 border-t pt-3">
+<button onclick="toggleSave(${p.id})" class="${p.saved?'text-black':''}"><i class="fa-solid fa-bookmark"></i> Save</button>
+<button onclick="toggleFollow(${p.id})" class="${p.follow?'text-black':''}"><i class="fa-solid fa-user-plus"></i> ${p.follow?'Following':'Follow'}</button>
+<button onclick="remix(${p.id})"><i class="fa-solid fa-retweet"></i> Remix</button>
+<button onclick="reply(${p.id})"><i class="fa-solid fa-reply"></i> Reply</button>
+<button onclick="copyText(\`${p.text}\`)"><i class="fa-solid fa-copy"></i> Copy</button>
+<button onclick="shareHash(${p.id})"><i class="fa-solid fa-hashtag"></i> Hashtag</button>
+</div></div>`});}
+render();
+function savePost(){let t=document.getElementById('postText').value;if(!t)return;let tags=t.match(/#\w+/g)||[];let fileInput=document.getElementById('fileUp');let obj={id:Date.now(),text:t,likes:0,saved:false,follow:false,hashtags:tags,file:'',type:'jobs'};if(fileInput.files[0]){let r=new FileReader();r.onload=e=>{obj.file=e.target.result;posts.unshift(obj);save();};r.readAsDataURL(fileInput.files[0]);}else{posts.unshift(obj);save();}document.getElementById('postText').value='';sendToAutomation(obj);}
+function save(){localStorage.setItem('achko_pro',JSON.stringify(posts));render();}
+function toggleSave(id){let p=posts.find(x=>x.id==id);p.saved=!p.saved;save();}
+function toggleFollow(id){let p=posts.find(x=>x.id==id);p.follow=!p.follow;save();}
+function remix(id){let p=posts.find(x=>x.id==id);document.getElementById('postText').value='Remix: '+p.text;window.scrollTo(0,0);}
+function reply(id){let r=prompt('Andika reply:');if(r){posts.unshift({id:Date.now(),text:'Reply: '+r,likes:0,saved:false,follow:false,hashtags:[],file:'',type:'tips'});save();}}
+function copyText(t){navigator.clipboard.writeText(t);alert('Copied!');}
+function shareHash(id){let p=posts.find(x=>x.id==id);copyText(p.hashtags.join(' '));}
+function editPost(id){let p=posts.find(x=>x.id==id);let n=prompt('Edit:',p.text);if(n){p.text=n;p.hashtags=n.match(/#\w+/g)||[];save();}}
+function filter(){let q=document.getElementById('search').value.toLowerCase();document.querySelectorAll('#list>div').forEach(d=>{d.style.display=d.dataset.text.includes(q)?'block':'none';});}
+function openCamera(){let v=document.getElementById('cam');v.classList.remove('hidden');navigator.mediaDevices.getUserMedia({video:true}).then(s=>{v.srcObject=s;v.onclick=()=>{let c=document.getElementById('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);let data=c.toDataURL();posts.unshift({id:Date.now(),text:document.getElementById('postText').value||'Camera shot',likes:0,saved:false,follow:false,hashtags:[],file:data,type:'jobs'});save();v.classList.add('hidden');s.getTracks().forEach(t=>t.stop());};});}
+function openCV(){document.getElementById('cvModal').classList.remove('hidden');}
+function genCV(){let n=document.getElementById('cvName').value,s=document.getElementById('cvSkill').value,e=document.getElementById('cvExp').value;let w=window.open('');w.document.write(`<h1>${n}</h1><p><b>Skills:</b> ${s}</p><p>${e}</p><p>Generated by A-CHKO CV</p>`);w.print();}
+function saveWebhook(){let u=document.getElementById('webhook').value;localStorage.setItem('achko_webhook',u);alert('Webhook saved! Sasa n8n itatuma kazi hapa auto');}
+function sendToAutomation(obj){let url=localStorage.getItem('achko_webhook');if(!url)return;fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)});}
+function changeLang(l){if(l=='all'){let all=prompt('Andika lugha yoyote duniani (en, sw, fr, de, zh, ar, hi...):');if(all) changeLang(all);}else alert('Language set to '+l+' - Google Translate itafanya kazi uki-host Vercel');}
+</script>
+</body></html>
