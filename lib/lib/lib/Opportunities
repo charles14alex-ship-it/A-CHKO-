@@ -1,0 +1,58 @@
+export const categories = [
+  "Jobs",
+  "Scholarships",
+  "Competitions",
+  "Collaborations",
+  "Business",
+  "Sports",
+  "Comedy",
+  "Education",
+  "Gaming",
+  "Technology",
+  "Music",
+  "Creative Opportunities",
+  "Entertainment"
+] as const;
+
+export type OpportunityCategory =
+  (typeof categories)[number];
+
+export interface Opportunity {
+  id: string;
+  title: string;
+  category: OpportunityCategory;
+  description: string;
+  organization: string;
+  country: string;
+  deadline: string | null;
+  sourceUrl: string;
+  applicationUrl?: string;
+  verified: boolean;
+}
+
+export const sampleOpportunities: Opportunity[] = [
+  {
+    id: "demo-001",
+    title: "Career Opportunities",
+    category: "Jobs",
+    description:
+      "Explore vacancies and check eligibility requirements.",
+    organization: "Official opportunity source",
+    country: "Tanzania",
+    deadline: null,
+    sourceUrl: "https://www.ajira.go.tz/",
+    verified: false
+  },
+  {
+    id: "demo-002",
+    title: "Scholarship Opportunities",
+    category: "Scholarships",
+    description:
+      "Explore scholarship information and confirm deadlines.",
+    organization: "Scholarship information portal",
+    country: "Global",
+    deadline: null,
+    sourceUrl: "https://www.scholarshipportal.com/",
+    verified: false
+  }
+];
