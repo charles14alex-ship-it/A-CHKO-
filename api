@@ -1,0 +1,100 @@
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const OpportunitySchema = z.object({
+  title: z.string().min(3).max(180),
+
+  category: z.enum([
+    "Jobs",
+    "Scholarships",
+    "Competitions",
+    "Collaborations",
+    "Business",
+    "Sports",
+    "Comedy",
+    "Education",
+    "Gaming",
+    "Technology",
+    "Music",
+    "Creative Opportunities",
+    "Entertainment"
+  ]),
+
+  description: z.string().min(5).max(5000),
+
+  organization: z.string().max(180).optional(),
+
+  country: z.string().max(100).optional(),
+
+  deadline: z.string().max(80).nullable().optional(),
+
+  sourceUrl: z.string().url(),
+
+  applicationUrl: z.string().url().optional()
+});
+
+export async function POST(req: NextRequest) {
+  const secret =
+    process.env.OPPORTUNITY_INGEST_SECRET;
+
+  if (!secret) {
+    return NextResponse.json(
+      { error: "Webhook is not configured." },
+      { status: 503 }
+    );
+  }
+
+  if (
+    req.headers.get("x-ingest-secret") !== secret
+  ) {
+    return NextResponse.json(
+      { error: "Unauthorized." },
+      { status: 401 }
+    );
+  }
+
+  let body: unknown;
+
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid JSON." },
+      { status: 400 }
+    );
+  }
+
+  const result =
+    OpportunitySchema.safeParse(body);
+
+  if (!result.success) {
+    return NextResponse.json(
+      {
+        error: "Invalid opportunity data.",
+        details: result.error.flatten()
+      },
+      { status: 400 }
+    );
+  }
+
+  const opportunity = {
+    ...result.data,
+    verified: false,
+    status: "pending_review"
+  };
+
+  // Next step:
+  // Save the opportunity to Supabase/PostgreSQL.
+  // Check duplicates using sourceUrl.
+  // Review the source before publishing.
+
+  return NextResponse.json(
+    {
+      success: true,
+      message:
+        "Opportunity validated; database storage is not configured yet.",
+      opportunity
+    },
+    { status: 202 }
+  );
+}
