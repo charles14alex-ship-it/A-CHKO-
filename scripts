@@ -1,7 +1,0 @@
-console.log(
-  "A-CHKO opportunity importer is ready for database integration."
-);
-
-console.log(
-  "Connect Supabase/PostgreSQL before importing live opportunities."
-);
