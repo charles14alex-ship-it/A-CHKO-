@@ -1,0 +1,92 @@
+const communities = [
+  // MAKUNDI YA WAUNDAJI WA MAUDHUI
+  "Africa Creators Group",
+  "Europe Creators Group",
+  "Asian Creators Group",
+  "America Creators Group",
+  "International Creators Group",
+  "Tanzania Creators",
+  "East Africa Creators",
+  "West Africa Creators",
+  "Southern Africa Creators",
+  "Content Creators & Influencers",
+  "Video Creators",
+  "Photography Creators",
+
+  // ELIMU NA UFADHILI
+  "Scholarships Opportunities",
+  "International Scholarships",
+  "University Students",
+  "College Students",
+  "Study Abroad",
+  "Research & Academic Opportunities",
+  "Online Learning",
+  "Internships & Graduate Training",
+
+  // AJIRA NA KAZI
+  "Jobs in Tanzania",
+  "Jobs in Africa",
+  "International Jobs",
+  "Remote Jobs",
+  "Freelancing Opportunities",
+  "Career Development",
+  "Youth Employment",
+
+  // BIASHARA NA UJASIRIAMALI
+  "Young Entrepreneurs",
+  "Africa Entrepreneurs",
+  "International Entrepreneurs",
+  "Small Business Ideas",
+  "Startup Founders",
+  "Business Networking",
+  "Investment Opportunities",
+  "Women in Business",
+
+  // TEKNOLOJIA
+  "AI & Technology",
+  "Software Developers",
+  "App Developers",
+  "Web Developers",
+  "Cybersecurity",
+  "Artificial Intelligence",
+  "Digital Innovation",
+  "Tech Startups",
+
+  // MICHEZO
+  "Football Fans",
+  "Tanzania Football",
+  "Africa Football",
+  "International Football",
+  "Basketball Fans",
+  "Athletes & Sports",
+  "Sports Opportunities",
+  "Esports & Gaming",
+
+  // MUZIKI NA BURUDANI
+  "Music Lovers",
+  "African Music",
+  "International Music",
+  "Upcoming Artists",
+  "Music Producers",
+  "Acting & Film",
+  "Comedy Creators",
+  "Entertainment Opportunities",
+
+  // SANAA NA VIPAJI
+  "Photography",
+  "Graphic Designers",
+  "Fashion & Modeling",
+  "Artists & Illustrators",
+  "Writers & Authors",
+  "Talent Discovery",
+  "Creative Arts",
+
+  // FURSA ZA VIJANA
+  "Youth Opportunities",
+  "Competitions & Awards",
+  "Grants & Funding",
+  "Volunteering Opportunities",
+  "Leadership & Networking",
+  "Community Projects",
+  "Travel Opportunities",
+];
