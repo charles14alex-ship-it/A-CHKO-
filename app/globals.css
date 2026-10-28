@@ -1,5 +1,3 @@
-@import "tailwindcss";
-
 :root {
   --background: #020617;
   --foreground: #f8fafc;
@@ -36,9 +34,7 @@ select {
 
 button {
   cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 button:active {
