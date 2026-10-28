@@ -1,391 +1,541 @@
 "use client";
 
 import { useState } from "react";
-
-const communities = [
-  { name: "Africa Creators", category: "Creators", icon: "🌍" },
-  { name: "Europe Creators", category: "Creators", icon: "🌍" },
-  { name: "Asia Creators", category: "Creators", icon: "🌏" },
-  { name: "International Creators", category: "Creators", icon: "🌐" },
-  { name: "Scholarships & Education", category: "Education", icon: "🎓" },
-  { name: "University Students", category: "Education", icon: "📚" },
-  { name: "Job Opportunities", category: "Jobs", icon: "💼" },
-  { name: "Young Entrepreneurs", category: "Business", icon: "🚀" },
-  { name: "Football Fans", category: "Sports", icon: "⚽" },
-  { name: "Music Lovers", category: "Music", icon: "🎵" },
-  { name: "Gamers", category: "Gaming", icon: "🎮" },
-  { name: "Photography", category: "Art", icon: "📸" },
-  { name: "AI & Technology", category: "Technology", icon: "🤖" },
-  { name: "Business Opportunities", category: "Business", icon: "📈" },
-];
+import {
+  Home,
+  Search,
+  PlusSquare,
+  Users,
+  UserRound,
+  Heart,
+  MessageCircle,
+  Share2,
+  Bookmark,
+  Bell,
+  Compass,
+  BriefcaseBusiness,
+  GraduationCap,
+  Music,
+  Gamepad2,
+  Camera,
+  Menu,
+  X,
+  Send,
+  TrendingUp,
+} from "lucide-react";
 
 type Post = {
   id: number;
-  text: string;
   author: string;
+  category: string;
+  text: string;
   likes: number;
-  comments: string[];
+  comments: number;
+  liked: boolean;
+  saved: boolean;
 };
+
+const initialPosts: Post[] = [
+  {
+    id: 1,
+    author: "A-CHKO Community",
+    category: "Entrepreneurship",
+    text: "Karibu A-CHKO! Gundua fursa za biashara, ajira, scholarships, michezo na ubunifu. Jiunge na jamii inayokusaidia kukua.",
+    likes: 24,
+    comments: 8,
+    liked: false,
+    saved: false,
+  },
+  {
+    id: 2,
+    author: "Young Entrepreneurs",
+    category: "Business",
+    text: "Unaanzaje biashara kwa mtaji mdogo? Shiriki mawazo yako, jifunze kutoka kwa wengine na jiunge na jamii ya wajasiriamali.",
+    likes: 17,
+    comments: 5,
+    liked: false,
+    saved: false,
+  },
+];
+
+const communities = [
+  { name: "African Creators", icon: "🌍", members: "12K members" },
+  { name: "Young Entrepreneurs", icon: "💡", members: "8K members" },
+  { name: "Scholarships", icon: "🎓", members: "15K members" },
+  { name: "University Students", icon: "📚", members: "9K members" },
+  { name: "Job Opportunities", icon: "💼", members: "20K members" },
+  { name: "Football Fans", icon: "⚽", members: "7K members" },
+  { name: "Music Lovers", icon: "🎵", members: "6K members" },
+  { name: "Gaming Community", icon: "🎮", members: "5K members" },
+  { name: "Photography", icon: "📸", members: "3K members" },
+  { name: "AI & Technology", icon: "🤖", members: "4K members" },
+  { name: "International Creators", icon: "🌐", members: "11K members" },
+  { name: "Asian Creators", icon: "🌏", members: "2K members" },
+  { name: "European Creators", icon: "🌍", members: "3K members" },
+  { name: "American Creators", icon: "🌎", members: "4K members" },
+];
+
+const opportunities = [
+  {
+    icon: "🎓",
+    title: "Scholarships",
+    detail: "Discover education funding opportunities.",
+  },
+  {
+    icon: "💼",
+    title: "Jobs & Careers",
+    detail: "Explore jobs and career opportunities.",
+  },
+  {
+    icon: "🚀",
+    title: "Business",
+    detail: "Discover business ideas and competitions.",
+  },
+  {
+    icon: "🏆",
+    title: "Competitions",
+    detail: "Find challenges and creator awards.",
+  },
+  {
+    icon: "⚽",
+    title: "Sports",
+    detail: "Connect with sports communities.",
+  },
+  {
+    icon: "🎵",
+    title: "Music & Arts",
+    detail: "Discover music, art and creative talent.",
+  },
+];
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("Home");
+  const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [search, setSearch] = useState("");
+  const [newPost, setNewPost] = useState("");
   const [joined, setJoined] = useState<string[]>([]);
-  const [postText, setPostText] = useState("");
-  const [commentText, setCommentText] = useState("");
-  const [commentingOn, setCommentingOn] = useState<number | null>(null);
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: 1,
-      text: "Karibu A-CHKO! Ungana na watu, jifunze ujuzi mpya na ugundue fursa za ajira, scholarships na biashara.",
-      author: "A-CHKO Community",
-      likes: 0,
-      comments: [],
-    },
-  ]);
+  const [notice, setNotice] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const filteredCommunities = communities.filter((community) =>
-    `${community.name} ${community.category}`
+  function showNotice(message: string) {
+    setNotice(message);
+    setTimeout(() => setNotice(""), 3000);
+  }
+
+  function toggleLike(id: number) {
+    setPosts((current) =>
+      current.map((post) =>
+        post.id === id
+          ? {
+              ...post,
+              liked: !post.liked,
+              likes: post.likes + (post.liked ? -1 : 1),
+            }
+          : post
+      )
+    );
+  }
+
+  function toggleSave(id: number) {
+    setPosts((current) =>
+      current.map((post) =>
+        post.id === id ? { ...post, saved: !post.saved } : post
+      )
+    );
+    showNotice("Hali ya kuhifadhi post imebadilishwa.");
+  }
+
+  function publishPost() {
+    if (!newPost.trim()) {
+      showNotice("Andika ujumbe kwanza.");
+      return;
+    }
+
+    const post: Post = {
+      id: Date.now(),
+      author: "You",
+      category: "Community",
+      text: newPost.trim(),
+      likes: 0,
+      comments: 0,
+      liked: false,
+      saved: false,
+    };
+
+    setPosts((current) => [post, ...current]);
+    setNewPost("");
+    setActiveTab("Home");
+    showNotice("Post imeongezwa kwenye feed yako.");
+  }
+
+  function toggleJoin(name: string) {
+    const isJoined = joined.includes(name);
+
+    setJoined((current) =>
+      isJoined ? current.filter((item) => item !== name) : [...current, name]
+    );
+
+    showNotice(isJoined ? `Umeondoka ${name}.` : `Umejiunga na ${name}.`);
+  }
+
+  const filteredPosts = posts.filter((post) =>
+    `${post.author} ${post.category} ${post.text}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
 
-  function createPost() {
-    if (!postText.trim()) return;
+  const filteredCommunities = communities.filter((community) =>
+    community.name.toLowerCase().includes(search.toLowerCase())
+  );
 
-    setPosts([
-      {
-        id: Date.now(),
-        text: postText.trim(),
-        author: "You",
-        likes: 0,
-        comments: [],
-      },
-      ...posts,
-    ]);
-
-    setPostText("");
-    setActiveTab("Home");
-  }
-
-  function toggleJoin(name: string) {
-    setJoined((current) =>
-      current.includes(name)
-        ? current.filter((item) => item !== name)
-        : [...current, name]
-    );
-  }
-
-  function likePost(id: number) {
-    setPosts((current) =>
-      current.map((post) =>
-        post.id === id ? { ...post, likes: post.likes + 1 } : post
-      )
-    );
-  }
-
-  function addComment(id: number) {
-    if (!commentText.trim()) return;
-
-    setPosts((current) =>
-      current.map((post) =>
-        post.id === id
-          ? { ...post, comments: [...post.comments, commentText.trim()] }
-          : post
-      )
-    );
-
-    setCommentText("");
-    setCommentingOn(null);
-  }
-
-  async function sharePost(text: string) {
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share({
-          title: "A-CHKO",
-          text,
-        });
-      } catch {
-        // Mtumiaji anaweza kufunga dirisha la kushiriki.
-      }
-    } else if (typeof navigator !== "undefined" && navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(text);
-        alert("Maandishi yamenakiliwa. Unaweza kuyashiriki.");
-      } catch {
-        alert(text);
-      }
-    } else {
-      alert(text);
-    }
+  function nav(tab: string) {
+    setActiveTab(tab);
+    setMenuOpen(false);
+    setSearch("");
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-slate-950/95 px-4 py-4">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
-          <button
-            onClick={() => setActiveTab("Home")}
-            className="text-left"
-          >
-            <span className="text-2xl font-black tracking-wider text-cyan-400">
-              A-CHKO
-            </span>
-            <span className="block text-xs text-slate-400">
-              Watch. Connect. Discover.
-            </span>
-          </button>
+    <main className="achko-app">
+      <header className="topbar">
+        <button
+          className="icon-button mobile-menu"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Open menu"
+        >
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
 
-          <button
-            onClick={() => setActiveTab("Profile")}
-            className="rounded-full border border-cyan-400/40 px-4 py-2 text-sm"
-          >
-            My Profile
-          </button>
+        <button className="brand" onClick={() => nav("Home")}>
+          <span className="brand-mark">A</span>
+          <span>A-CHKO</span>
+        </button>
+
+        <div className="top-search">
+          <Search size={19} />
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search posts, groups and opportunities..."
+            aria-label="Search"
+          />
         </div>
+
+        <button
+          className="icon-button notification-button"
+          onClick={() => showNotice("Hakuna taarifa mpya kwa sasa.")}
+          aria-label="Notifications"
+        >
+          <Bell size={21} />
+        </button>
+
+        <button className="profile-avatar" onClick={() => nav("Profile")}>
+          U
+        </button>
       </header>
 
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 md:grid-cols-[210px_1fr]">
-        <aside className="h-fit rounded-2xl border border-white/10 bg-slate-900 p-3">
-          <p className="mb-3 px-3 text-xs uppercase tracking-widest text-slate-500">
-            Main menu
-          </p>
+      {notice && <div className="notice">{notice}</div>}
 
-          {["Home", "Discover", "Create", "Communities", "Opportunities", "Profile"].map(
-            (tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`mb-1 w-full rounded-xl px-3 py-3 text-left text-sm ${
-                  activeTab === tab
-                    ? "bg-cyan-400 font-bold text-slate-950"
-                    : "text-slate-300 hover:bg-slate-800"
-                }`}
-              >
-                {tab === "Home" && "🏠 "}
-                {tab === "Discover" && "🔎 "}
-                {tab === "Create" && "✍️ "}
-                {tab === "Communities" && "👥 "}
-                {tab === "Opportunities" && "🎯 "}
-                {tab === "Profile" && "👤 "}
-                {tab}
-              </button>
-            )
-          )}
+      <div className="app-layout">
+        <aside className={`sidebar ${menuOpen ? "sidebar-open" : ""}`}>
+          <p className="side-label">MENU</p>
 
-          <div className="mt-5 rounded-xl bg-slate-800 p-3">
-            <p className="text-sm font-bold text-cyan-300">
-              One hub, endless possibilities.
-            </p>
-            <p className="mt-2 text-xs leading-5 text-slate-400">
-              Connect with people and discover opportunities around the world.
-            </p>
+          <button
+            className={`nav-item ${activeTab === "Home" ? "active" : ""}`}
+            onClick={() => nav("Home")}
+          >
+            <Home size={20} /> Home
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === "Discover" ? "active" : ""}`}
+            onClick={() => nav("Discover")}
+          >
+            <Compass size={20} /> Discover
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === "Create" ? "active" : ""}`}
+            onClick={() => nav("Create")}
+          >
+            <PlusSquare size={20} /> Create post
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === "Communities" ? "active" : ""}`}
+            onClick={() => nav("Communities")}
+          >
+            <Users size={20} /> Communities
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === "Opportunities" ? "active" : ""}`}
+            onClick={() => nav("Opportunities")}
+          >
+            <BriefcaseBusiness size={20} /> Opportunities
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === "Profile" ? "active" : ""}`}
+            onClick={() => nav("Profile")}
+          >
+            <UserRound size={20} /> Profile
+          </button>
+
+          <div className="sidebar-divider" />
+
+          <p className="side-label">YOUR INTERESTS</p>
+
+          <button className="nav-item" onClick={() => nav("Discover")}>
+            <GraduationCap size={20} /> Education
+          </button>
+
+          <button className="nav-item" onClick={() => nav("Discover")}>
+            <Music size={20} /> Music
+          </button>
+
+          <button className="nav-item" onClick={() => nav("Discover")}>
+            <Gamepad2 size={20} /> Gaming
+          </button>
+
+          <button className="nav-item" onClick={() => nav("Discover")}>
+            <Camera size={20} /> Photography
+          </button>
+
+          <div className="sidebar-promo">
+            <span>🌟</span>
+            <strong>One hub.</strong>
+            <strong>Endless possibilities.</strong>
+            <p>Watch, connect and discover opportunities.</p>
           </div>
         </aside>
 
-        <section className="min-w-0">
+        <section className="main-content">
           {activeTab === "Home" && (
             <>
-              <div className="mb-6 rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-950 to-slate-900 p-6 sm:p-8">
-                <p className="text-sm font-semibold uppercase tracking-widest text-cyan-300">
-                  Welcome to A-CHKO
-                </p>
-                <h1 className="mt-3 text-3xl font-black sm:text-4xl">
-                  Connect. Create. Grow.
-                </h1>
-                <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">
-                  Discover scholarships, jobs, business ideas, sports,
-                  entertainment and communities that match your interests.
-                </p>
+              <section className="welcome-banner">
+                <div>
+                  <span className="eyebrow">YOUR WORLD. YOUR OPPORTUNITIES.</span>
+                  <h1>Welcome to A-CHKO</h1>
+                  <p>
+                    Watch, connect and discover opportunities all in one hub.
+                  </p>
+                  <button
+                    className="primary-button"
+                    onClick={() => nav("Discover")}
+                  >
+                    Explore now <TrendingUp size={17} />
+                  </button>
+                </div>
+                <div className="banner-art" aria-hidden="true">
+                  🌍
+                </div>
+              </section>
+
+              <div className="section-heading">
+                <div>
+                  <h2>Your community feed</h2>
+                  <p>Ideas, stories and conversations from your community.</p>
+                </div>
                 <button
-                  onClick={() => setActiveTab("Discover")}
-                  className="mt-5 rounded-xl bg-cyan-400 px-5 py-3 font-bold text-slate-950"
+                  className="outline-button"
+                  onClick={() => nav("Create")}
                 >
-                  Explore A-CHKO →
+                  <PlusSquare size={17} /> Create
                 </button>
               </div>
 
-              <div className="mb-5 rounded-2xl border border-white/10 bg-slate-900 p-4">
-                <h2 className="mb-3 font-bold">Create a post</h2>
-                <textarea
-                  value={postText}
-                  onChange={(event) => setPostText(event.target.value)}
-                  placeholder="What would you like to share?"
-                  className="min-h-24 w-full resize-y rounded-xl border border-white/10 bg-slate-950 p-3 text-sm outline-none focus:border-cyan-400"
-                />
-                <div className="mt-3 flex justify-end">
-                  <button
-                    onClick={createPost}
-                    className="rounded-xl bg-cyan-400 px-5 py-2 font-bold text-slate-950"
-                  >
-                    Publish post
-                  </button>
-                </div>
-              </div>
+              <section className="create-box">
+                <div className="profile-avatar">U</div>
+                <button
+                  className="post-prompt"
+                  onClick={() => nav("Create")}
+                >
+                  Share an idea, story or opportunity...
+                </button>
+                <button
+                  className="primary-button compact"
+                  onClick={() => nav("Create")}
+                >
+                  Post
+                </button>
+              </section>
 
-              <h2 className="mb-4 text-xl font-bold">Community feed</h2>
-
-              <div className="space-y-4">
-                {posts.map((post) => (
-                  <article
-                    key={post.id}
-                    className="rounded-2xl border border-white/10 bg-slate-900 p-4"
-                  >
-                    <p className="text-sm font-bold text-cyan-300">
-                      {post.author}
-                    </p>
-                    <p className="my-4 whitespace-pre-wrap text-sm leading-7 text-slate-200">
-                      {post.text}
-                    </p>
-
-                    <div className="flex flex-wrap gap-2 border-t border-white/10 pt-3">
-                      <button
-                        onClick={() => likePost(post.id)}
-                        className="rounded-lg bg-slate-800 px-3 py-2 text-sm"
-                      >
-                        ❤️ Like ({post.likes})
-                      </button>
-                      <button
-                        onClick={() =>
-                          setCommentingOn(
-                            commentingOn === post.id ? null : post.id
-                          )
-                        }
-                        className="rounded-lg bg-slate-800 px-3 py-2 text-sm"
-                      >
-                        💬 Comment ({post.comments.length})
-                      </button>
-                      <button
-                        onClick={() => sharePost(post.text)}
-                        className="rounded-lg bg-slate-800 px-3 py-2 text-sm"
-                      >
-                        ↗ Share
-                      </button>
-                    </div>
-
-                    {commentingOn === post.id && (
-                      <div className="mt-3 flex gap-2">
-                        <input
-                          value={commentText}
-                          onChange={(event) => setCommentText(event.target.value)}
-                          placeholder="Write a comment..."
-                          className="min-w-0 flex-1 rounded-lg border border-white/10 bg-slate-950 p-3 text-sm"
-                        />
+              <div className="feed-list">
+                {filteredPosts.length === 0 ? (
+                  <div className="empty-state">
+                    <Search size={32} />
+                    <h3>No posts found</h3>
+                    <p>Try another search term.</p>
+                  </div>
+                ) : (
+                  filteredPosts.map((post) => (
+                    <article className="post-card" key={post.id}>
+                      <div className="post-header">
+                        <div className="post-avatar">
+                          {post.author.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="post-author">
+                          <strong>{post.author}</strong>
+                          <span>{post.category} · A-CHKO community</span>
+                        </div>
                         <button
-                          onClick={() => addComment(post.id)}
-                          className="rounded-lg bg-cyan-400 px-3 text-sm font-bold text-slate-950"
+                          className="icon-button save-button"
+                          onClick={() => toggleSave(post.id)}
+                          aria-label="Save post"
                         >
-                          Send
+                          <Bookmark
+                            size={19}
+                            fill={post.saved ? "currentColor" : "none"}
+                          />
                         </button>
                       </div>
-                    )}
 
-                    {post.comments.map((comment, index) => (
-                      <p
-                        key={`${post.id}-${index}`}
-                        className="mt-2 rounded-lg bg-slate-800 p-3 text-sm text-slate-300"
-                      >
-                        {comment}
-                      </p>
-                    ))}
-                  </article>
-                ))}
+                      <p className="post-text">{post.text}</p>
+
+                      <div className="post-stats">
+                        <span>{post.likes} likes</span>
+                        <span>{post.comments} comments</span>
+                      </div>
+
+                      <div className="post-actions">
+                        <button
+                          className={post.liked ? "liked action-button" : "action-button"}
+                          onClick={() => toggleLike(post.id)}
+                        >
+                          <Heart
+                            size={19}
+                            fill={post.liked ? "currentColor" : "none"}
+                          />
+                          Like
+                        </button>
+                        <button
+                          className="action-button"
+                          onClick={() =>
+                            showNotice("Maoni yataongezwa kwenye hatua ya backend.")
+                          }
+                        >
+                          <MessageCircle size={19} /> Comment
+                        </button>
+                        <button
+                          className="action-button"
+                          onClick={() => {
+                            if (navigator.share) {
+                              navigator.share({
+                                title: "A-CHKO",
+                                text: post.text,
+                              }).catch(() => {});
+                            } else {
+                              showNotice("Kushiriki kunapatikana kupitia kifaa chako.");
+                            }
+                          }}
+                        >
+                          <Share2 size={19} /> Share
+                        </button>
+                      </div>
+                    </article>
+                  ))
+                )}
               </div>
             </>
           )}
 
           {activeTab === "Discover" && (
             <>
-              <h1 className="mb-2 text-2xl font-black">Discover</h1>
-              <p className="mb-5 text-sm text-slate-400">
-                Find communities and people who share your interests.
-              </p>
+              <div className="page-heading">
+                <span className="eyebrow">EXPLORE YOUR WORLD</span>
+                <h1>Discover</h1>
+                <p>Find people, communities and topics you care about.</p>
+              </div>
 
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search groups, jobs, scholarships..."
-                className="mb-5 w-full rounded-xl border border-white/10 bg-slate-900 p-4 outline-none focus:border-cyan-400"
-              />
+              <div className="search-panel">
+                <Search size={20} />
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search communities..."
+                />
+              </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <h2 className="subheading">Popular communities</h2>
+
+              <div className="community-grid">
                 {filteredCommunities.map((community) => (
-                  <div
+                  <CommunityCard
                     key={community.name}
-                    className="rounded-2xl border border-white/10 bg-slate-900 p-4"
-                  >
-                    <span className="text-3xl">{community.icon}</span>
-                    <h2 className="mt-3 font-bold">{community.name}</h2>
-                    <p className="mt-1 text-sm text-slate-400">
-                      {community.category}
-                    </p>
-                    <button
-                      onClick={() => toggleJoin(community.name)}
-                      className={`mt-4 w-full rounded-xl px-4 py-2 text-sm font-bold ${
-                        joined.includes(community.name)
-                          ? "bg-slate-700 text-white"
-                          : "bg-cyan-400 text-slate-950"
-                      }`}
-                    >
-                      {joined.includes(community.name)
-                        ? "✓ Joined"
-                        : "Join community"}
-                    </button>
-                  </div>
+                    community={community}
+                    joined={joined.includes(community.name)}
+                    onJoin={() => toggleJoin(community.name)}
+                  />
                 ))}
               </div>
+
+              {filteredCommunities.length === 0 && (
+                <p className="empty-state">Hakuna jamii iliyopatikana.</p>
+              )}
             </>
           )}
 
           {activeTab === "Create" && (
-            <div className="rounded-2xl border border-white/10 bg-slate-900 p-5">
-              <h1 className="mb-4 text-2xl font-black">Create content</h1>
-              <p className="mb-4 text-sm text-slate-400">
-                Share an idea, experience or opportunity with the community.
-              </p>
-              <textarea
-                value={postText}
-                onChange={(event) => setPostText(event.target.value)}
-                placeholder="Write your post here..."
-                className="min-h-40 w-full rounded-xl border border-white/10 bg-slate-950 p-4"
-              />
-              <button
-                onClick={createPost}
-                className="mt-4 rounded-xl bg-cyan-400 px-5 py-3 font-bold text-slate-950"
-              >
-                Publish
-              </button>
-            </div>
+            <>
+              <div className="page-heading">
+                <span className="eyebrow">SHARE WITH THE WORLD</span>
+                <h1>Create a post</h1>
+                <p>Share ideas, stories and opportunities with your community.</p>
+              </div>
+
+              <section className="create-form">
+                <label htmlFor="post-content">What would you like to share?</label>
+                <textarea
+                  id="post-content"
+                  value={newPost}
+                  onChange={(event) => setNewPost(event.target.value)}
+                  placeholder="Tell your story, share a business idea, or post an opportunity..."
+                  rows={7}
+                  maxLength={2000}
+                />
+                <div className="form-footer">
+                  <span>{newPost.length}/2000 characters</span>
+                  <button className="primary-button" onClick={publishPost}>
+                    Publish post <Send size={17} />
+                  </button>
+                </div>
+              </section>
+
+              <div className="info-note">
+                <strong>Coming next</strong>
+                <p>
+                  Photo and video uploads will need storage and backend
+                  integration.
+                </p>
+              </div>
+            </>
           )}
 
           {activeTab === "Communities" && (
             <>
-              <h1 className="mb-2 text-2xl font-black">Communities</h1>
-              <p className="mb-5 text-sm text-slate-400">
-                Join groups based on your interests.
-              </p>
-              <div className="space-y-3">
-                {communities.map((community) => (
-                  <div
+              <div className="page-heading">
+                <span className="eyebrow">FIND YOUR PEOPLE</span>
+                <h1>Communities</h1>
+                <p>Join a group, share knowledge and grow together.</p>
+              </div>
+
+              <div className="search-panel">
+                <Search size={20} />
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search communities..."
+                />
+              </div>
+
+              <div className="community-grid">
+                {filteredCommunities.map((community) => (
+                  <CommunityCard
                     key={community.name}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-slate-900 p-4"
-                  >
-                    <div>
-                      <p className="font-bold">
-                        {community.icon} {community.name}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-400">
-                        {community.category}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => toggleJoin(community.name)}
-                      className="rounded-lg bg-cyan-400 px-3 py-2 text-xs font-bold text-slate-950"
-                    >
-                      {joined.includes(community.name) ? "Joined" : "Join"}
-                    </button>
-                  </div>
+                    community={community}
+                    joined={joined.includes(community.name)}
+                    onJoin={() => toggleJoin(community.name)}
+                  />
                 ))}
               </div>
             </>
@@ -393,76 +543,197 @@ export default function HomePage() {
 
           {activeTab === "Opportunities" && (
             <>
-              <h1 className="mb-2 text-2xl font-black">Opportunities</h1>
-              <p className="mb-5 text-sm text-slate-400">
-                Explore opportunity categories. Verified live listings
-                will require a connected data source.
-              </p>
+              <div className="page-heading">
+                <span className="eyebrow">GROW YOUR FUTURE</span>
+                <h1>Opportunities</h1>
+                <p>Explore categories that can help you move forward.</p>
+              </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  ["🎓", "Scholarships", "Education funding and study opportunities"],
-                  ["💼", "Jobs & Internships", "Career and work opportunities"],
-                  ["🚀", "Business", "Entrepreneurship and business ideas"],
-                  ["🏆", "Competitions", "Challenges, awards and contests"],
-                  ["⚽", "Sports", "Sports communities and events"],
-                  ["🎵", "Music & Creativity", "Creative projects and talent"],
-                ].map(([icon, title, description]) => (
-                  <div
-                    key={title}
-                    className="rounded-2xl border border-white/10 bg-slate-900 p-5"
+              <div className="opportunity-grid">
+                {opportunities.map((item) => (
+                  <button
+                    className="opportunity-card"
+                    key={item.title}
+                    onClick={() => {
+                      setSearch(item.title);
+                      showNotice(
+                        `Umechagua ${item.title}. Fursa halisi zitaunganishwa kwenye backend.`
+                      );
+                    }}
                   >
-                    <span className="text-3xl">{icon}</span>
-                    <h2 className="mt-3 font-bold">{title}</h2>
-                    <p className="mt-2 text-sm leading-6 text-slate-400">
-                      {description}
-                    </p>
-                    <button
-                      onClick={() => {
-                        setSearch(title);
-                        setActiveTab("Discover");
-                      }}
-                      className="mt-4 rounded-lg border border-cyan-400/50 px-4 py-2 text-sm text-cyan-300"
-                    >
-                      Explore →
-                    </button>
-                  </div>
+                    <span className="opportunity-icon">{item.icon}</span>
+                    <h3>{item.title}</h3>
+                    <p>{item.detail}</p>
+                    <span className="text-link">Explore →</span>
+                  </button>
                 ))}
+              </div>
+
+              <div className="info-note">
+                <strong>Important</strong>
+                <p>
+                  Hizi ni categories za fursa. Matangazo halisi ya ajira na
+                  scholarships yatahitaji data source au backend.
+                </p>
               </div>
             </>
           )}
 
           {activeTab === "Profile" && (
-            <div className="rounded-2xl border border-white/10 bg-slate-900 p-6">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-400 text-3xl text-slate-950">
-                👤
+            <>
+              <div className="page-heading">
+                <span className="eyebrow">YOUR SPACE</span>
+                <h1>Your profile</h1>
+                <p>Manage your activity on A-CHKO.</p>
               </div>
-              <h1 className="text-2xl font-black">My Profile</h1>
-              <p className="mt-2 text-sm text-slate-400">
-                Your A-CHKO profile
-              </p>
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-slate-800 p-4">
-                  <p className="text-2xl font-black">{posts.length}</p>
-                  <p className="text-xs text-slate-400">Posts in this session</p>
+
+              <section className="profile-card">
+                <div className="large-avatar">U</div>
+                <h2>A-CHKO Member</h2>
+                <p>Share. Connect. Grow.</p>
+
+                <div className="profile-stats">
+                  <div>
+                    <strong>{posts.length}</strong>
+                    <span>Posts</span>
+                  </div>
+                  <div>
+                    <strong>{joined.length}</strong>
+                    <span>Communities</span>
+                  </div>
+                  <div>
+                    <strong>
+                      {posts.reduce((total, post) => total + post.likes, 0)}
+                    </strong>
+                    <span>Post likes</span>
+                  </div>
                 </div>
-                <div className="rounded-xl bg-slate-800 p-4">
-                  <p className="text-2xl font-black">{joined.length}</p>
-                  <p className="text-xs text-slate-400">Groups joined</p>
-                </div>
+
+                <button
+                  className="primary-button"
+                  onClick={() => nav("Create")}
+                >
+                  <PlusSquare size={18} /> Create a post
+                </button>
+              </section>
+
+              <div className="info-note">
+                <strong>Account setup</strong>
+                <p>
+                  Profile editing, secure login and permanent account storage
+                  will be connected to Supabase.
+                </p>
               </div>
-              <p className="mt-5 text-xs leading-5 text-amber-300">
-                Profile information and memberships are currently stored
-                in this browser session, not in a user account.
-              </p>
-            </div>
+            </>
           )}
         </section>
+
+        <aside className="right-sidebar">
+          <section className="right-card">
+            <div className="right-card-heading">
+              <h3>Trending communities</h3>
+              <TrendingUp size={18} />
+            </div>
+
+            {communities.slice(0, 5).map((community) => (
+              <div className="trending-item" key={community.name}>
+                <span className="trending-emoji">{community.icon}</span>
+                <div>
+                  <strong>{community.name}</strong>
+                  <span>{community.members}</span>
+                </div>
+              </div>
+            ))}
+
+            <button
+              className="text-link full-link"
+              onClick={() => nav("Communities")}
+            >
+              See all communities →
+            </button>
+          </section>
+
+          <section className="right-card opportunity-highlight">
+            <span className="highlight-icon">🚀</span>
+            <h3>Discover opportunities</h3>
+            <p>Find scholarships, jobs and ways to grow your future.</p>
+            <button
+              className="primary-button full-button"
+              onClick={() => nav("Opportunities")}
+            >
+              Explore opportunities
+            </button>
+          </section>
+
+          <p className="footer-note">
+            About · Community Guidelines · Privacy
+            <br />
+            © 2026 A-CHKO
+          </p>
+        </aside>
       </div>
 
-      <footer className="border-t border-white/10 px-4 py-6 text-center text-xs text-slate-500">
-        © {new Date().getFullYear()} A-CHKO · One hub, endless possibilities.
-      </footer>
+      <nav className="mobile-bottom-nav">
+        <button
+          className={activeTab === "Home" ? "mobile-active" : ""}
+          onClick={() => nav("Home")}
+        >
+          <Home size={21} />
+          <span>Home</span>
+        </button>
+        <button
+          className={activeTab === "Discover" ? "mobile-active" : ""}
+          onClick={() => nav("Discover")}
+        >
+          <Compass size={21} />
+          <span>Discover</span>
+        </button>
+        <button
+          className={activeTab === "Create" ? "mobile-active" : ""}
+          onClick={() => nav("Create")}
+        >
+          <PlusSquare size={21} />
+          <span>Create</span>
+        </button>
+        <button
+          className={activeTab === "Communities" ? "mobile-active" : ""}
+          onClick={() => nav("Communities")}
+        >
+          <Users size={21} />
+          <span>Groups</span>
+        </button>
+        <button
+          className={activeTab === "Profile" ? "mobile-active" : ""}
+          onClick={() => nav("Profile")}
+        >
+          <UserRound size={21} />
+          <span>Profile</span>
+        </button>
+      </nav>
     </main>
+  );
+}
+
+function CommunityCard({
+  community,
+  joined,
+  onJoin,
+}: {
+  community: { name: string; icon: string; members: string };
+  joined: boolean;
+  onJoin: () => void;
+}) {
+  return (
+    <article className="community-card">
+      <div className="community-icon">{community.icon}</div>
+      <h3>{community.name}</h3>
+      <p>{community.members}</p>
+      <button
+        className={joined ? "outline-button joined-button" : "primary-button"}
+        onClick={onJoin}
+      >
+        {joined ? "Joined ✓" : "Join group"}
+      </button>
+    </article>
   );
 }
